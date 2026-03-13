@@ -1,0 +1,24 @@
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    curl \
+    python3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install MultiChain
+RUN wget -q https://www.multichain.com/download/multichain-2.3.3.tar.gz \
+    && tar -xzf multichain-2.3.3.tar.gz \
+    && mv multichain-2.3.3/multichaind multichain-2.3.3/multichain-cli multichain-2.3.3/multichain-util /usr/local/bin/ \
+    && rm -rf multichain-2.3.3 multichain-2.3.3.tar.gz
+
+# Copy entrypoint
+COPY entrypoint-master.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 7418 7419
+
+ENTRYPOINT ["/entrypoint.sh"]

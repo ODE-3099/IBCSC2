@@ -1,5 +1,3 @@
-version: "3.8"
-
 networks:
   multichain-net:
     driver: bridge
@@ -10,81 +8,76 @@ services:
   # NODE 1 — Master Node (creates the chain)
   # ─────────────────────────────────────────
   node1:
-    image: ${MULTICHAIN_IMAGE:-pranavt61/multichain-docker}
+    build:
+      context: .
+      dockerfile: Dockerfile.master
     container_name: node1
     hostname: node1
     environment:
       - CHAIN_NAME=${CHAIN_NAME:-mychain}
-      - NETWORK_PORT=${P2P_PORT:-7418}
+      - P2P_PORT=${P2P_PORT:-7418}
       - RPC_PORT=${RPC_PORT:-7419}
       - RPC_USER=${RPC_USER:-multichainrpc}
       - RPC_PASSWORD=${RPC_PASSWORD:-password123}
-      - IS_MASTER=true
     ports:
-      - "7418:7418"   # P2P
-      - "7419:7419"   # RPC
+      - "7418:7418"
+      - "7419:7419"
     volumes:
       - node1-data:/root/.multichain
     networks:
       - multichain-net
-    healthcheck:
-      test: ["CMD-SHELL", "multichain-cli ${CHAIN_NAME:-mychain} getinfo || exit 1"]
-      interval: 15s
-      timeout: 10s
-      retries: 10
-      start_period: 30s
 
   # ─────────────────────────────────────────
   # NODE 2 — Peer Node
   # ─────────────────────────────────────────
   node2:
-    image: ${MULTICHAIN_IMAGE:-pranavt61/multichain-docker}
+    build:
+      context: .
+      dockerfile: Dockerfile.peer
     container_name: node2
     hostname: node2
     environment:
       - CHAIN_NAME=${CHAIN_NAME:-mychain}
-      - NETWORK_PORT=${P2P_PORT:-7418}
+      - P2P_PORT=${P2P_PORT:-7418}
       - RPC_PORT=${RPC_PORT:-7419}
       - RPC_USER=${RPC_USER:-multichainrpc}
       - RPC_PASSWORD=${RPC_PASSWORD:-password123}
       - MASTER_NODE=node1
-      - IS_MASTER=false
     ports:
-      - "7420:7418"   # P2P (mapped to host 7420)
-      - "7421:7419"   # RPC (mapped to host 7421)
+      - "7420:7418"
+      - "7421:7419"
     volumes:
       - node2-data:/root/.multichain
     networks:
       - multichain-net
     depends_on:
-      node1:
-        condition: service_healthy
+      - node1
 
   # ─────────────────────────────────────────
   # NODE 3 — Peer Node
   # ─────────────────────────────────────────
   node3:
-    image: ${MULTICHAIN_IMAGE:-pranavt61/multichain-docker}
+    build:
+      context: .
+      dockerfile: Dockerfile.peer
     container_name: node3
     hostname: node3
     environment:
       - CHAIN_NAME=${CHAIN_NAME:-mychain}
-      - NETWORK_PORT=${P2P_PORT:-7418}
+      - P2P_PORT=${P2P_PORT:-7418}
       - RPC_PORT=${RPC_PORT:-7419}
       - RPC_USER=${RPC_USER:-multichainrpc}
       - RPC_PASSWORD=${RPC_PASSWORD:-password123}
       - MASTER_NODE=node1
-      - IS_MASTER=false
     ports:
-      - "7422:7418"   # P2P (mapped to host 7422)
-      - "7423:7419"   # RPC (mapped to host 7423)
+      - "7422:7418"
+      - "7423:7419"
     volumes:
       - node3-data:/root/.multichain
     networks:
       - multichain-net
     depends_on:
-      node1:
-        condition: service_healthy
+      - node1
 
 volumes:
   node1-data:
