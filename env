@@ -1,0 +1,18 @@
+# Multichain Network Configuration
+CHAIN_NAME=mychain
+
+# Ports
+P2P_PORT=7418
+RPC_PORT=7419
+
+# RPC Credentials
+RPC_USER=multichainrpc
+RPC_PASSWORD=password123
+
+# Node hostnames (used in Docker network)
+NODE1_HOST=node1
+NODE2_HOST=node2
+NODE3_HOST=node3
+
+# Docker image
+MULTICHAIN_IMAGE=pranavt61/multichain-docker
